@@ -11,7 +11,7 @@ namespace EquipmentModelTutorial
     {
         public static ABB.Vtrin.Drivers.cDriverSkeleton driver;
 
-        // NOTE: Never push your credentials into repository.
+        // NOTE: Never push your credentials into a repository.
         // This will do because of the demonstration purposes.
         private static readonly string DATA_SOURCE = "wss://localhost/history";
         private static readonly string DB_USERNAME = "username";
