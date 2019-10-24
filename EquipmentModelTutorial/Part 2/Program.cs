@@ -55,36 +55,36 @@ namespace EquipmentModelTutorial
             string db_password)
         {
             // Set up a memory stream to catch exceptions
-            MemoryStream memoryStream = new MemoryStream();
-            TraceListener listener = new TextWriterTraceListener(memoryStream, "connectlistener");
-            Trace.Listeners.Add(listener);
-
-            // Convert password to a secure string
-            SecureString db_password_secure = new SecureString();
-            db_password.ToList().ForEach(c => db_password_secure.AppendChar(c));
-
-            // Initialize the database driver
-            driver = dataloader.Connect(
-                data_source,
-                db_username,
-                db_password_secure,
-                ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
-                | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges,
-                out _);
-
-            // Unbind the connect listener
-            Trace.Listeners.Remove("connectlistener");
-
-            // Case: driver is null, something went wrong
-            // > throw an error
-            if (driver == null)
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Read stack trace from the memorystream buffer
-                string msg = Encoding.UTF8.GetString(memoryStream.GetBuffer());
-                throw new ApplicationException(msg);
-            }
+                TraceListener listener = new TextWriterTraceListener(memoryStream, "connectlistener");
+                Trace.Listeners.Add(listener);
 
-            memoryStream.Dispose();
+                // Convert password to a secure string
+                SecureString db_password_secure = new SecureString();
+                db_password.ToList().ForEach(c => db_password_secure.AppendChar(c));
+
+                // Initialize the database driver
+                driver = dataloader.Connect(
+                    data_source,
+                    db_username,
+                    db_password_secure,
+                    ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
+                    | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges,
+                    out _);
+
+                // Unbind the connect listener
+                Trace.Listeners.Remove("connectlistener");
+
+                // Case: driver is null, something went wrong
+                // > throw an error
+                if (driver == null)
+                {
+                    // Read stack trace from the memorystream buffer
+                    string msg = Encoding.UTF8.GetString(memoryStream.GetBuffer());
+                    throw new ApplicationException(msg);
+                }
+            }
         }
     }
 }
