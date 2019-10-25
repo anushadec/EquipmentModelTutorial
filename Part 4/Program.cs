@@ -98,7 +98,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "",
                 propertyDescription: "The manufacturer of the device",
                 isHistorized: false,
-                relatedEquipmentType: baseEquipmentType);
+                equipmentType: baseEquipmentType);
 
             // Tank properties
             // ===============
@@ -109,7 +109,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "m",
                 propertyDescription: "The water level inside the tank",
                 isHistorized: true,
-                relatedEquipmentType: tankType);
+                equipmentType: tankType);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Volume",
@@ -117,7 +117,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "m3",
                 propertyDescription: "The volume of the water tank",
                 isHistorized: false,
-                relatedEquipmentType: tankType);
+                equipmentType: tankType);
 
             // Pipe properties
             // ===============
@@ -128,7 +128,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "cm",
                 propertyDescription: "The diameter of the pipe",
                 isHistorized: false,
-                relatedEquipmentType: pipeType);
+                equipmentType: pipeType);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Flow",
@@ -136,7 +136,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "l/min",
                 propertyDescription: "The current water flow through the pipe",
                 isHistorized: true,
-                relatedEquipmentType: pipeType);
+                equipmentType: pipeType);
 
             // Pump properties
             // ===============
@@ -147,7 +147,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "W",
                 propertyDescription: "The current power of the pump",
                 isHistorized: true,
-                relatedEquipmentType: pumpType);
+                equipmentType: pumpType);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Nominal power",
@@ -155,7 +155,7 @@ namespace EquipmentModelTutorial
                 propertyUnit: "W",
                 propertyDescription: "The nominal power of the pump",
                 isHistorized: false,
-                relatedEquipmentType: pumpType);
+                equipmentType: pumpType);
         }
 
         public static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
@@ -163,7 +163,7 @@ namespace EquipmentModelTutorial
             bool isAbstract = false,
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = null)
         {
-            // Try to find existing equipment type with that name
+            // Try to find existing equipment type with the given name
             ABB.Vtrin.Interfaces.IEquipment equipmentType =
                 (ABB.Vtrin.Interfaces.IEquipment)driver.Classes["Equipment"].Instances[equipmentTypeName]?.BeginUpdate();
 
@@ -186,14 +186,14 @@ namespace EquipmentModelTutorial
             ABB.Vtrin.cTypeCode propertyType,
             string propertyUnit,
             bool isHistorized,
-            ABB.Vtrin.Interfaces.IEquipment relatedEquipmentType,
+            ABB.Vtrin.Interfaces.IEquipment equipmentType,
             string propertyDescription = null)
         {
             ABB.Vtrin.Interfaces.IPropertyDefinition property = null;
 
             try
             {
-                // Try to find existing equipment type property with that name
+                // Try to find existing equipment type property with the given name
                 property = (ABB.Vtrin.Interfaces.IPropertyDefinition)driver.Classes["EquipmentPropertyInfo"].Instances
                     .GetInstanceSet("DisplayName=?", propertyName)
                     .First()
@@ -216,7 +216,7 @@ namespace EquipmentModelTutorial
                 property.Unit = propertyUnit;
                 property.Description = propertyDescription;
                 property.Historized = isHistorized;
-                property.Equipment = relatedEquipmentType;
+                property.Equipment = equipmentType;
 
                 // Save or update property
                 property.CommitChanges();
