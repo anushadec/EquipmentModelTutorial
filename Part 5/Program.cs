@@ -59,6 +59,9 @@ namespace EquipmentModelTutorial
             // CREATE EQUIPMENT TYPES
             // ======================
 
+            // Abstract base types
+            // ===================
+
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Device",
                 isAbstract: true);
@@ -73,8 +76,8 @@ namespace EquipmentModelTutorial
                 baseEquipmentType: baseEquipmentType,
                 isAbstract: true);
 
-            // Actual equipment
-            // ================
+            // Equipment types
+            // ===============
 
             ABB.Vtrin.Interfaces.IEquipment tankType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Tank",
@@ -145,7 +148,7 @@ namespace EquipmentModelTutorial
             // ===============
 
             CreateOrUpdateEquipmentProperty(
-                propertyName: "Power",
+                propertyName: "Current power",
                 propertyType: ABB.Vtrin.cTypeCode.Double,
                 propertyUnit: "W",
                 propertyDescription: "The current power of the pump",
@@ -200,7 +203,7 @@ namespace EquipmentModelTutorial
             return equipmentType;
         }
 
-        private static void CreateOrUpdateEquipmentProperty(
+        private static ABB.Vtrin.Interfaces.IPropertyDefinition CreateOrUpdateEquipmentProperty(
             string propertyName,
             ABB.Vtrin.cTypeCode propertyType,
             string propertyUnit,
@@ -239,7 +242,10 @@ namespace EquipmentModelTutorial
 
                 // Save or update property
                 property.CommitChanges();
+
             }
+            
+            return property;
         }
 
         private static void CreateOrUpdateEquipmentInstances()
