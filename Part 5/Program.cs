@@ -254,11 +254,11 @@ namespace EquipmentModelTutorial
             // =====================
 
             ABB.Vtrin.Interfaces.IEquipmentInstance sourceTank = GetOrCreateEquipmentInstance(
-                instanceName: "Customer Site.Water transfer system.Tank area.Source tank",
+                instanceName: "Example site.Water transfer system.Tank area.Source tank",
                 equipmentType: driver.Classes["Path_Tank"]);
 
             ABB.Vtrin.Interfaces.IEquipmentInstance targetTank = GetOrCreateEquipmentInstance(
-                instanceName: "Customer Site.Water transfer system.Tank area.Target tank",
+                instanceName: "Example site.Water transfer system.Tank area.Target tank",
                 equipmentType: driver.Classes["Path_Tank"]);
 
 
@@ -266,18 +266,18 @@ namespace EquipmentModelTutorial
             // =====================
 
             ABB.Vtrin.Interfaces.IEquipmentInstance mainPipe = GetOrCreateEquipmentInstance(
-                instanceName: "Customer Site.Water transfer system.Pipe",
+                instanceName: "Example site.Water transfer system.Pipe",
                 equipmentType: driver.Classes["Path_Pipe"]);
 
             ABB.Vtrin.Interfaces.IEquipmentInstance flowbackPipe = GetOrCreateEquipmentInstance(
-                instanceName: "Customer Site.Water transfer system.Flowback pipe",
+                instanceName: "Example site.Water transfer system.Flowback pipe",
                 equipmentType: driver.Classes["Path_Pipe"]);
 
             // Define pump instance
             // ====================
 
             ABB.Vtrin.Interfaces.IEquipmentInstance pump = GetOrCreateEquipmentInstance(
-                instanceName: "Customer Site.Water transfer system.Pump section.Pump",
+                instanceName: "Example site.Water transfer system.Pump section.Pump",
                 equipmentType: driver.Classes["Path_Pump"]);
 
 
