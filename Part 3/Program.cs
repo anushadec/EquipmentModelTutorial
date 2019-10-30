@@ -1,10 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Security;
-using System.Text;
-
 namespace EquipmentModelTutorial
 {
     class Program
@@ -19,27 +12,26 @@ namespace EquipmentModelTutorial
 
         static void Main(string[] args)
         {
-            ABB.Vtrin.cDataLoader dataloader = null;
+            var dataloader = new ABB.Vtrin.cDataLoader();
 
             try
             {
                 // Try to connect to the database
-                dataloader = new ABB.Vtrin.cDataLoader();
                 ConnectOrThrow(
                     dataloader: dataloader,
                     data_source: DATA_SOURCE,
                     db_username: DB_USERNAME,
                     db_password: DB_PASSWORD);
 
-                // Create or equipment type and properties
+                // Create or update equipment type and properties
                 CreateOrUpdateEquipmentTypes();
             }
 
             // Case: Something went wrong
             // > Log the error
-            catch (Exception e)
+            catch (System.Exception e)
             {
-                Console.WriteLine(e.ToString());
+                System.Console.WriteLine(e.ToString());
             }
 
             finally
@@ -52,35 +44,39 @@ namespace EquipmentModelTutorial
 
         public static void CreateOrUpdateEquipmentTypes()
         {
-            // Create base equipment
-            // =====================
 
-            ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = CreateOrUpdateEquipmentType(
+            // CREATE EQUIPMENT TYPES
+            // ======================
+
+            // Abstract base types
+            // ===================
+
+            var baseEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Device",
                 isAbstract: true);
 
-            ABB.Vtrin.Interfaces.IEquipment mechanicalEquipmentType = CreateOrUpdateEquipmentType(
+            var mechanicalEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Mechanical device",
                 baseEquipmentType: baseEquipmentType,
                 isAbstract: true);
 
-            ABB.Vtrin.Interfaces.IEquipment electricalEquipmentType = CreateOrUpdateEquipmentType(
+            var electricalEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Electrical device",
                 baseEquipmentType: baseEquipmentType,
                 isAbstract: true);
 
-            // Create equipment
-            // ================
+            // Equipment types
+            // ===============
 
-            ABB.Vtrin.Interfaces.IEquipment tankType = CreateOrUpdateEquipmentType(
+            var tankType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Tank",
                 baseEquipmentType: mechanicalEquipmentType);
 
-            ABB.Vtrin.Interfaces.IEquipment pipeType = CreateOrUpdateEquipmentType(
+            var pipeType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Pipe",
                 baseEquipmentType: mechanicalEquipmentType);
 
-            ABB.Vtrin.Interfaces.IEquipment pumpType = CreateOrUpdateEquipmentType(
+            var pumpType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Pump",
                 baseEquipmentType: electricalEquipmentType);
         }
@@ -90,14 +86,16 @@ namespace EquipmentModelTutorial
             bool isAbstract = false,
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = null)
         {
-            // Try to search equipment type from the database
-            ABB.Vtrin.Interfaces.IEquipment equipmentType =
-                (ABB.Vtrin.Interfaces.IEquipment)driver.Classes["Equipment"].Instances[equipmentTypeName]?.BeginUpdate();
+            var equipmentCache = driver.Classes["Equipment"].Instances;
 
-            // Case: Existing equipment type was not found
+            // Try to find existing equipment type with the given name
+            var equipmentType =
+                (ABB.Vtrin.Interfaces.IEquipment)equipmentCache[equipmentTypeName]?.BeginUpdate();
+
+            // Case: No existing equipment type found
             // > Create a new equipment type
             if (equipmentType == null)
-                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)driver.Classes["Equipment"].Instances.Add();
+                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)equipmentCache.Add();
 
             // Update attributes and commit changes
             equipmentType.Name = equipmentTypeName;
