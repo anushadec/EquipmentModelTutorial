@@ -1,5 +1,3 @@
-using System;
-
 namespace EquipmentModelTutorial
 {
     class Program {
