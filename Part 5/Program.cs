@@ -2,13 +2,13 @@ namespace EquipmentModelTutorial
 {
     class Program
     {
-        public static ABB.Vtrin.Drivers.cDriverSkeleton driver;
+        private static ABB.Vtrin.Drivers.cDriverSkeleton RTDBDriver;
 
         // NOTE: Never push your credentials into a repository.
         // This will do because of the demonstration purposes.
-        private static readonly string DATA_SOURCE = "wss://localhost/history";
-        private static readonly string DB_USERNAME = "username";
-        private static readonly string DB_PASSWORD = "password";
+        private static readonly string RTDBHost = "wss://localhost/history";
+        private static readonly string RTDBUsername = "username";
+        private static readonly string RTDBPassword = "password";
 
         static void Main(string[] args)
         {
@@ -19,9 +19,9 @@ namespace EquipmentModelTutorial
                 // Try to connect to the database
                 ConnectOrThrow(
                     dataloader: dataloader,
-                    data_source: DATA_SOURCE,
-                    db_username: DB_USERNAME,
-                    db_password: DB_PASSWORD);
+                    rtdbHost: RTDBHost,
+                    rtdbUsername: RTDBUsername,
+                    rtdbPassword: RTDBPassword);
 
                 // Create or update equipment type and properties
                 CreateOrUpdateEquipmentTypes();
@@ -45,7 +45,7 @@ namespace EquipmentModelTutorial
             }
         }
 
-        public static void CreateOrUpdateEquipmentTypes()
+        private static void CreateOrUpdateEquipmentTypes()
         {
 
             // CREATE EQUIPMENT TYPES
@@ -172,12 +172,12 @@ namespace EquipmentModelTutorial
                 equipmentType: pumpType);
         }
 
-        public static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
+        private static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
             string equipmentTypeName,
             bool isAbstract = false,
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = null)
         {
-            var equipmentCache = driver.Classes["Equipment"].Instances;
+            var equipmentCache = RTDBDriver.Classes["Equipment"].Instances;
 
             // Try to find existing equipment type with the given name
             var equipmentType =
@@ -206,15 +206,15 @@ namespace EquipmentModelTutorial
             string propertyDescription = null)
         {
             ABB.Vtrin.Interfaces.IPropertyDefinition property;
-            var propertyInfoCache = driver.Classes["EquipmentPropertyInfo"].Instances;
+            var equipmentPropertyInstances = RTDBDriver.Classes["EquipmentPropertyInfo"].Instances;
 
             // Query existing property infos using property name and equipment type
-            var properties = propertyInfoCache.GetInstanceSet("Equipment=? AND DisplayName=?", equipmentType, propertyName);
-            
+            var properties = equipmentPropertyInstances.GetInstanceSet("Equipment=? AND DisplayName=?", equipmentType, propertyName);
+
             // Case: No existing property found
             // > Create a new property
             if (properties.Length == 0)
-                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)propertyInfoCache.Add();
+                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)equipmentPropertyInstances.Add();
 
             // Case: Existing property found
             // > Select that and begin to update
@@ -242,11 +242,11 @@ namespace EquipmentModelTutorial
 
             var sourceTank = GetOrCreateEquipmentInstance(
                 instanceName: "Example site.Water transfer system.Tank area.Source tank",
-                equipmentType: driver.Classes["Path_Tank"]);
+                equipmentType: RTDBDriver.Classes["Path_Tank"]);
 
             var targetTank = GetOrCreateEquipmentInstance(
                 instanceName: "Example site.Water transfer system.Tank area.Target tank",
-                equipmentType: driver.Classes["Path_Tank"]);
+                equipmentType: RTDBDriver.Classes["Path_Tank"]);
 
 
             // Define pipe instances
@@ -254,18 +254,18 @@ namespace EquipmentModelTutorial
 
             var mainPipe = GetOrCreateEquipmentInstance(
                 instanceName: "Example site.Water transfer system.Pipe",
-                equipmentType: driver.Classes["Path_Pipe"]);
+                equipmentType: RTDBDriver.Classes["Path_Pipe"]);
 
             var flowbackPipe = GetOrCreateEquipmentInstance(
                 instanceName: "Example site.Water transfer system.Flowback pipe",
-                equipmentType: driver.Classes["Path_Pipe"]);
+                equipmentType: RTDBDriver.Classes["Path_Pipe"]);
 
             // Define pump instance
             // ====================
 
             var pump = GetOrCreateEquipmentInstance(
                 instanceName: "Example site.Water transfer system.Pump section.Pump",
-                equipmentType: driver.Classes["Path_Pump"]);
+                equipmentType: RTDBDriver.Classes["Path_Pump"]);
 
 
             // Defining instance properties
@@ -321,9 +321,9 @@ namespace EquipmentModelTutorial
 
         private static void ConnectOrThrow(
             ABB.Vtrin.cDataLoader dataloader,
-            string data_source,
-            string db_username,
-            string db_password)
+            string rtdbHost,
+            string rtdbUsername,
+            string rtdbPassword)
         {
             // Set up a memory stream to catch exceptions
             using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
@@ -337,10 +337,10 @@ namespace EquipmentModelTutorial
                     | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges;
 
                 // Initialize the database driver
-                driver = dataloader.Connect(
-                    data_source,
-                    db_username,
-                    db_password,
+                RTDBDriver = dataloader.Connect(
+                    rtdbHost,
+                    rtdbUsername,
+                    rtdbPassword,
                     false);
 
                 // Unbind the connect listener
@@ -348,7 +348,7 @@ namespace EquipmentModelTutorial
 
                 // Case: driver is null, something went wrong
                 // > throw an error
-                if (driver == null)
+                if (RTDBDriver == null)
                 {
                     // Read stack trace from the memorystream buffer
                     string msg = System.Text.Encoding.UTF8.GetString(memoryStream.GetBuffer());
