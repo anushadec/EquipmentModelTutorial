@@ -19,27 +19,26 @@ namespace EquipmentModelTutorial
 
         static void Main(string[] args)
         {
-            ABB.Vtrin.cDataLoader dataloader = null;
+            var dataloader = new ABB.Vtrin.cDataLoader();
 
             try
             {
                 // Try to connect to the database
-                dataloader = new ABB.Vtrin.cDataLoader();
                 ConnectOrThrow(
                     dataloader: dataloader,
                     data_source: DATA_SOURCE,
                     db_username: DB_USERNAME,
                     db_password: DB_PASSWORD);
 
-                // Create or equipment type and properties
+                // Create or update equipment type and properties
                 CreateOrUpdateEquipmentTypes();
             }
 
             // Case: Something went wrong
             // > Log the error
-            catch (Exception e)
+            catch (System.Exception e)
             {
-                Console.WriteLine(e.ToString());
+                System.Console.WriteLine(e.ToString());
             }
 
             finally
@@ -56,32 +55,35 @@ namespace EquipmentModelTutorial
             // CREATE EQUIPMENT TYPES
             // ======================
 
-            ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = CreateOrUpdateEquipmentType(
+            // Abstract base types
+            // ===================
+
+            var baseEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Device",
                 isAbstract: true);
 
-            ABB.Vtrin.Interfaces.IEquipment mechanicalEquipmentType = CreateOrUpdateEquipmentType(
+            var mechanicalEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Mechanical device",
                 baseEquipmentType: baseEquipmentType,
                 isAbstract: true);
 
-            ABB.Vtrin.Interfaces.IEquipment electricalEquipmentType = CreateOrUpdateEquipmentType(
+            var electricalEquipmentType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Electrical device",
                 baseEquipmentType: baseEquipmentType,
                 isAbstract: true);
 
-            // Actual equipment
-            // ================
+            // Equipment types
+            // ===============
 
-            ABB.Vtrin.Interfaces.IEquipment tankType = CreateOrUpdateEquipmentType(
+            var tankType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Tank",
                 baseEquipmentType: mechanicalEquipmentType);
 
-            ABB.Vtrin.Interfaces.IEquipment pipeType = CreateOrUpdateEquipmentType(
+            var pipeType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Pipe",
                 baseEquipmentType: mechanicalEquipmentType);
 
-            ABB.Vtrin.Interfaces.IEquipment pumpType = CreateOrUpdateEquipmentType(
+            var pumpType = CreateOrUpdateEquipmentType(
                 equipmentTypeName: "Pump",
                 baseEquipmentType: electricalEquipmentType);
 
@@ -142,7 +144,7 @@ namespace EquipmentModelTutorial
             // ===============
 
             CreateOrUpdateEquipmentProperty(
-                propertyName: "Power",
+                propertyName: "Current power",
                 propertyType: ABB.Vtrin.cTypeCode.Double,
                 propertyUnit: "W",
                 propertyDescription: "The current power of the pump",
@@ -156,6 +158,22 @@ namespace EquipmentModelTutorial
                 propertyDescription: "The nominal power of the pump",
                 isHistorized: false,
                 equipmentType: pumpType);
+
+            CreateOrUpdateEquipmentProperty(
+                propertyName: "Source tank",
+                propertyType: ABB.Vtrin.cTypeCode.GUID,
+                propertyUnit: null,
+                propertyDescription: "The tank that pump is pumping water from",
+                isHistorized: false,
+                equipmentType: pumpType);
+
+            CreateOrUpdateEquipmentProperty(
+                propertyName: "Target tank",
+                propertyType: ABB.Vtrin.cTypeCode.GUID,
+                propertyUnit: null,
+                propertyDescription: "The tank that pump is pumping water into",
+                isHistorized: false,
+                equipmentType: pumpType);
         }
 
         public static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
@@ -163,14 +181,16 @@ namespace EquipmentModelTutorial
             bool isAbstract = false,
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = null)
         {
+            var equipmentCache = driver.Classes["Equipment"].Instances;
+
             // Try to find existing equipment type with the given name
-            ABB.Vtrin.Interfaces.IEquipment equipmentType =
-                (ABB.Vtrin.Interfaces.IEquipment)driver.Classes["Equipment"].Instances[equipmentTypeName]?.BeginUpdate();
+            var equipmentType =
+                (ABB.Vtrin.Interfaces.IEquipment)equipmentCache[equipmentTypeName]?.BeginUpdate();
 
             // Case: No existing equipment type found
             // > Create a new equipment type
             if (equipmentType == null)
-                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)driver.Classes["Equipment"].Instances.Add();
+                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)equipmentCache.Add();
 
             // Update attributes and commit changes
             equipmentType.Name = equipmentTypeName;
@@ -181,7 +201,7 @@ namespace EquipmentModelTutorial
             return equipmentType;
         }
 
-        private static void CreateOrUpdateEquipmentProperty(
+        private static ABB.Vtrin.Interfaces.IPropertyDefinition CreateOrUpdateEquipmentProperty(
             string propertyName,
             ABB.Vtrin.cTypeCode propertyType,
             string propertyUnit,
@@ -189,40 +209,36 @@ namespace EquipmentModelTutorial
             ABB.Vtrin.Interfaces.IEquipment equipmentType,
             string propertyDescription = null)
         {
-            ABB.Vtrin.Interfaces.IPropertyDefinition property = null;
+            ABB.Vtrin.Interfaces.IPropertyDefinition property;
+            var propertyInfoCache = driver.Classes["EquipmentPropertyInfo"].Instances;
 
-            try
-            {
-                // Try to find existing equipment type property with the given name
-                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)driver.Classes["EquipmentPropertyInfo"].Instances
-                    .GetInstanceSet("DisplayName=?", propertyName)
-                    .First()
-                    .BeginUpdate();
-            }
-
+            // Query existing property infos using property name and equipment type
+            var properties = propertyInfoCache.GetInstanceSet("Equipment=? AND DisplayName=?", equipmentType, propertyName);
+            
             // Case: No existing property found
             // > Create a new property
-            catch (System.InvalidOperationException)
-            {
-                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)driver.Classes["EquipmentPropertyInfo"].Instances
-                    .Add();
-            }
+            if (properties.Length == 0)
+                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)propertyInfoCache.Add();
 
-            finally
-            {
-                // Set property info
-                property.DisplayName = propertyName;
-                property.Type = (int)propertyType;
-                property.Unit = propertyUnit;
-                property.Description = propertyDescription;
-                property.Historized = isHistorized;
-                property.Equipment = equipmentType;
+            // Case: Existing property found
+            // > Select that and begin to update
+            else
+                property = (ABB.Vtrin.Interfaces.IPropertyDefinition)properties[0].BeginUpdate();
 
-                // Save or update property
-                property.CommitChanges();
-            }
+            // Update property info
+            property.DisplayName = propertyName;
+            property.Type = (int)propertyType;
+            property.Unit = propertyUnit;
+            property.Description = propertyDescription;
+            property.Historized = isHistorized;
+            property.Equipment = equipmentType;
+
+            // Save or update property
+            property.CommitChanges();
+
+            return property;
         }
-
+        
         private static void ConnectOrThrow(
             ABB.Vtrin.cDataLoader dataloader,
             string data_source,
@@ -230,34 +246,33 @@ namespace EquipmentModelTutorial
             string db_password)
         {
             // Set up a memory stream to catch exceptions
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
             {
-                TraceListener listener = new TextWriterTraceListener(memoryStream, "connectlistener");
-                Trace.Listeners.Add(listener);
+                var listener = new System.Diagnostics.TextWriterTraceListener(memoryStream, "connectlistener");
+                System.Diagnostics.Trace.Listeners.Add(listener);
 
-                // Convert password to a secure string
-                SecureString db_password_secure = new SecureString();
-                db_password.ToList().ForEach(c => db_password_secure.AppendChar(c));
+                // Set connection options
+                dataloader.ConnectOptions =
+                    ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
+                    | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges;
 
                 // Initialize the database driver
                 driver = dataloader.Connect(
                     data_source,
                     db_username,
-                    db_password_secure,
-                    ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
-                    | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges,
-                    out _);
+                    db_password,
+                    false);
 
                 // Unbind the connect listener
-                Trace.Listeners.Remove("connectlistener");
+                System.Diagnostics.Trace.Listeners.Remove("connectlistener");
 
                 // Case: driver is null, something went wrong
                 // > throw an error
                 if (driver == null)
                 {
                     // Read stack trace from the memorystream buffer
-                    string msg = Encoding.UTF8.GetString(memoryStream.GetBuffer());
-                    throw new ApplicationException(msg);
+                    string msg = System.Text.Encoding.UTF8.GetString(memoryStream.GetBuffer());
+                    throw new System.ApplicationException(msg);
                 }
             }
         }
