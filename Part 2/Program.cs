@@ -1,10 +1,3 @@
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Security;
-using System.Text;
-
 namespace EquipmentModelTutorial
 {
     class Program
@@ -19,29 +12,29 @@ namespace EquipmentModelTutorial
 
         static void Main(string[] args)
         {
-            ABB.Vtrin.cDataLoader dataloader = null;
+            var dataloader = new ABB.Vtrin.cDataLoader();
 
             try
             {
                 // Try to connect to the database
-                dataloader = new ABB.Vtrin.cDataLoader();
                 ConnectOrThrow(
                     dataloader: dataloader,
                     data_source: DATA_SOURCE,
                     db_username: DB_USERNAME,
                     db_password: DB_PASSWORD);
 
-                Console.WriteLine("Connection successful!");
+                System.Console.WriteLine("Connection successful!");
             }
 
             // Case: Something went wrong
             // > Log the error
-            catch (Exception e)
+            catch (System.Exception e)
             {
-                Console.WriteLine(e.ToString());
+                System.Console.WriteLine(e.ToString());
             }
 
-            finally {
+            finally
+            {
                 // Dispose dataloader if necessary
                 if (dataloader != null)
                     dataloader.Dispose();
@@ -55,34 +48,33 @@ namespace EquipmentModelTutorial
             string db_password)
         {
             // Set up a memory stream to catch exceptions
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream())
             {
-                TraceListener listener = new TextWriterTraceListener(memoryStream, "connectlistener");
-                Trace.Listeners.Add(listener);
+                var listener = new System.Diagnostics.TextWriterTraceListener(memoryStream, "connectlistener");
+                System.Diagnostics.Trace.Listeners.Add(listener);
 
-                // Convert password to a secure string
-                SecureString db_password_secure = new SecureString();
-                db_password.ToList().ForEach(c => db_password_secure.AppendChar(c));
+                // Set connection options
+                dataloader.ConnectOptions =
+                    ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
+                    | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges;
 
                 // Initialize the database driver
                 driver = dataloader.Connect(
                     data_source,
                     db_username,
-                    db_password_secure,
-                    ABB.Vtrin.cDataLoader.cConnectOptions.AcceptNewServerKeys
-                    | ABB.Vtrin.cDataLoader.cConnectOptions.AcceptServerKeyChanges,
-                    out _);
+                    db_password,
+                    false);
 
                 // Unbind the connect listener
-                Trace.Listeners.Remove("connectlistener");
+                System.Diagnostics.Trace.Listeners.Remove("connectlistener");
 
                 // Case: driver is null, something went wrong
                 // > throw an error
                 if (driver == null)
                 {
                     // Read stack trace from the memorystream buffer
-                    string msg = Encoding.UTF8.GetString(memoryStream.GetBuffer());
-                    throw new ApplicationException(msg);
+                    string msg = System.Text.Encoding.UTF8.GetString(memoryStream.GetBuffer());
+                    throw new System.ApplicationException(msg);
                 }
             }
         }
