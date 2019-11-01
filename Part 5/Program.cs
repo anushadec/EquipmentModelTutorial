@@ -161,7 +161,8 @@ namespace EquipmentModelTutorial
                 propertyUnit: null,
                 propertyDescription: "The tank that pump is pumping water from",
                 isHistorized: false,
-                equipmentType: pumpType);
+                equipmentType: pumpType,
+                referenceTarget: "Class:" + tankType.ClassName);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Target tank",
@@ -169,7 +170,26 @@ namespace EquipmentModelTutorial
                 propertyUnit: null,
                 propertyDescription: "The tank that pump is pumping water into",
                 isHistorized: false,
-                equipmentType: pumpType);
+                equipmentType: pumpType,
+                referenceTarget: "Class:" + tankType.ClassName);
+
+            CreateOrUpdateEquipmentProperty(
+                propertyName: "Operational state",
+                propertyType: ABB.Vtrin.cTypeCode.String,
+                propertyUnit: null,
+                propertyDescription: "Tells whether the pump is running or not",
+                isHistorized: true,
+                equipmentType: pumpType,
+                referenceTarget: "Enumeration:65537.Binary Text(1)");
+
+            CreateOrUpdateEquipmentProperty(
+               propertyName: "Power state",
+               propertyType: ABB.Vtrin.cTypeCode.String,
+               propertyUnit: null,
+               propertyDescription: "Tells whehter the pump is powered or not",
+               isHistorized: true,
+               equipmentType: pumpType,
+               referenceTarget: "Enumeration:65537.Binary Text(6)");
         }
 
         private static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
@@ -177,16 +197,16 @@ namespace EquipmentModelTutorial
             bool isAbstract = false,
             ABB.Vtrin.Interfaces.IEquipment baseEquipmentType = null)
         {
-            var equipmentCache = RTDBDriver.Classes["Equipment"].Instances;
+            var equipmentIntances = RTDBDriver.Classes["Equipment"].Instances;
 
             // Try to find existing equipment type with the given name
             var equipmentType =
-                (ABB.Vtrin.Interfaces.IEquipment)equipmentCache[equipmentTypeName]?.BeginUpdate();
+                (ABB.Vtrin.Interfaces.IEquipment)equipmentIntances[equipmentTypeName]?.BeginUpdate();
 
             // Case: No existing equipment type found
             // > Create a new equipment type
             if (equipmentType == null)
-                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)equipmentCache.Add();
+                equipmentType = (ABB.Vtrin.Interfaces.IEquipment)equipmentIntances.Add();
 
             // Update attributes and commit changes
             equipmentType.Name = equipmentTypeName;
@@ -203,7 +223,8 @@ namespace EquipmentModelTutorial
             string propertyUnit,
             bool isHistorized,
             ABB.Vtrin.Interfaces.IEquipment equipmentType,
-            string propertyDescription = null)
+            string propertyDescription = null,
+            string referenceTarget = null)
         {
             ABB.Vtrin.Interfaces.IPropertyDefinition property;
             var equipmentPropertyInstances = RTDBDriver.Classes["EquipmentPropertyInfo"].Instances;
@@ -228,6 +249,7 @@ namespace EquipmentModelTutorial
             property.Description = propertyDescription;
             property.Historized = isHistorized;
             property.Equipment = equipmentType;
+            property.ReferenceTarget = referenceTarget;
 
             // Save or update property
             property.CommitChanges();
@@ -272,8 +294,8 @@ namespace EquipmentModelTutorial
             // ============================
 
             pump = pump.BeginUpdate();
-            pump["Source tank"] = sourceTank.Id;
-            pump["Target tank"] = targetTank.Id;
+            pump["Source tank"] = sourceTank;
+            pump["Target tank"] = targetTank;
             pump["Nominal power"] = 1000;
             pump["Manufacturer"] = "Pumps & Pipes Inc.";
             pump.CommitChanges();
