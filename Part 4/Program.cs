@@ -101,7 +101,7 @@ namespace EquipmentModelTutorial
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Level",
                 propertyType: ABB.Vtrin.cTypeCode.Double,
-                propertyUnit: "m",
+                propertyUnit: "mm",
                 propertyDescription: "The water level inside the tank",
                 isHistorized: true,
                 equipmentType: tankType);
