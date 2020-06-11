@@ -158,7 +158,8 @@ namespace EquipmentModelTutorial
                 propertyUnit: null,
                 propertyDescription: "The tank that pump is pumping water from",
                 isHistorized: false,
-                equipmentType: pumpType);
+                equipmentType: pumpType,
+                referenceTarget: "Class:" + tankType.ClassName);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Target tank",
@@ -166,7 +167,8 @@ namespace EquipmentModelTutorial
                 propertyUnit: null,
                 propertyDescription: "The tank that pump is pumping water into",
                 isHistorized: false,
-                equipmentType: pumpType);
+                equipmentType: pumpType,
+                referenceTarget: "Class:" + tankType.ClassName);
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Operational state",
