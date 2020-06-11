@@ -263,11 +263,11 @@ namespace EquipmentModelTutorial
             // =====================
 
             var sourceTank = GetOrCreateEquipmentInstance(
-                instanceName: "Example site.Water transfer system.Tank area.Source tank",
+                instanceName: "Example site.Tank area.Source tank",
                 equipmentType: RTDBDriver.Classes["Path_Tank"]);
 
             var targetTank = GetOrCreateEquipmentInstance(
-                instanceName: "Example site.Water transfer system.Tank area.Target tank",
+                instanceName: "Example site.Tank area.Target tank",
                 equipmentType: RTDBDriver.Classes["Path_Tank"]);
 
 
@@ -275,18 +275,18 @@ namespace EquipmentModelTutorial
             // =====================
 
             var mainPipe = GetOrCreateEquipmentInstance(
-                instanceName: "Example site.Water transfer system.Pipe",
+                instanceName: "Example site.Pipe",
                 equipmentType: RTDBDriver.Classes["Path_Pipe"]);
 
             var flowbackPipe = GetOrCreateEquipmentInstance(
-                instanceName: "Example site.Water transfer system.Flowback pipe",
+                instanceName: "Example site.Flowback pipe",
                 equipmentType: RTDBDriver.Classes["Path_Pipe"]);
 
             // Define pump instance
             // ====================
 
             var pump = GetOrCreateEquipmentInstance(
-                instanceName: "Example site.Water transfer system.Pump section.Pump",
+                instanceName: "Example site.Pump section.Pump",
                 equipmentType: RTDBDriver.Classes["Path_Pump"]);
 
 
