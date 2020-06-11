@@ -180,16 +180,16 @@ namespace EquipmentModelTutorial
                 propertyDescription: "Tells whether the pump is running or not",
                 isHistorized: true,
                 equipmentType: pumpType,
-                referenceTarget: "Enumeration:65537.Binary Text(1)");
+                referenceTarget: "Enumeration:Binary Text(1)");
 
             CreateOrUpdateEquipmentProperty(
                propertyName: "Power state",
                propertyType: ABB.Vtrin.cTypeCode.String,
                propertyUnit: null,
-               propertyDescription: "Tells whehter the pump is powered or not",
+               propertyDescription: "Tells whether the pump is powered or not",
                isHistorized: true,
                equipmentType: pumpType,
-               referenceTarget: "Enumeration:65537.Binary Text(6)");
+               referenceTarget: "Enumeration:Binary Text(6)");
         }
 
         private static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(

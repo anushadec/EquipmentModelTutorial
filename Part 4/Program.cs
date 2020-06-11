@@ -167,6 +167,24 @@ namespace EquipmentModelTutorial
                 propertyDescription: "The tank that pump is pumping water into",
                 isHistorized: false,
                 equipmentType: pumpType);
+
+            CreateOrUpdateEquipmentProperty(
+                propertyName: "Operational state",
+                propertyType: ABB.Vtrin.cTypeCode.String,
+                propertyUnit: null,
+                propertyDescription: "Tells whether the pump is running or not",
+                isHistorized: true,
+                equipmentType: pumpType,
+                referenceTarget: "Enumeration:Binary Text(1)");
+
+            CreateOrUpdateEquipmentProperty(
+               propertyName: "Power state",
+               propertyType: ABB.Vtrin.cTypeCode.String,
+               propertyUnit: null,
+               propertyDescription: "Tells whether the pump is powered or not",
+               isHistorized: true,
+               equipmentType: pumpType,
+               referenceTarget: "Enumeration:Binary Text(6)");
         }
 
         public static ABB.Vtrin.Interfaces.IEquipment CreateOrUpdateEquipmentType(
