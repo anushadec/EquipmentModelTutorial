@@ -137,7 +137,7 @@ namespace EquipmentModelTutorial
             // ===============
 
             CreateOrUpdateEquipmentProperty(
-                propertyName: "Current power",
+                propertyName: "Power",
                 propertyType: ABB.Vtrin.cTypeCode.Double,
                 propertyUnit: "W",
                 propertyDescription: "The current power of the pump",
