@@ -177,7 +177,7 @@ namespace EquipmentModelTutorial
                 propertyName: "Operational state",
                 propertyType: ABB.Vtrin.cTypeCode.Int16,
                 propertyUnit: null,
-                propertyDescription: "Tells whether the pump is running or not",
+                propertyDescription: "Writing to this property turns the pump on or off",
                 isHistorized: true,
                 equipmentType: pumpType,
                 referenceTarget: "Enumeration:Binary Text(1)");
