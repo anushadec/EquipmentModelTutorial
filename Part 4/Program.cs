@@ -172,7 +172,7 @@ namespace EquipmentModelTutorial
 
             CreateOrUpdateEquipmentProperty(
                 propertyName: "Operational state",
-                propertyType: ABB.Vtrin.cTypeCode.String,
+                propertyType: ABB.Vtrin.cTypeCode.Int16,
                 propertyUnit: null,
                 propertyDescription: "Tells whether the pump is running or not",
                 isHistorized: true,
@@ -181,7 +181,7 @@ namespace EquipmentModelTutorial
 
             CreateOrUpdateEquipmentProperty(
                propertyName: "Power state",
-               propertyType: ABB.Vtrin.cTypeCode.String,
+               propertyType: ABB.Vtrin.cTypeCode.Int16,
                propertyUnit: null,
                propertyDescription: "Tells whether the pump is powered or not",
                isHistorized: true,
